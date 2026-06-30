@@ -69,7 +69,7 @@
 
     // audio
     const audio = document.getElementById('audio-player');
-    audio.src = `assets/audio/${nb}.mp3`;
+    audio.src = `https://github.com/gracewang3051-web/hua-web/releases/download/v1.0.0/${nb}.mp3`;
     document.getElementById('audio-info').textContent = `${nb}.mp3 · 加载中...`;
     audio.addEventListener('loadedmetadata', () => {
       const dur = Math.round(audio.duration);
