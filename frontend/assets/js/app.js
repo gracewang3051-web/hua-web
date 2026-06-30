@@ -1,7 +1,12 @@
 // 华老师导读强化应用 · 公共脚本
-// 功能：user_id 持久化、API 调用、统计刷新
+// 数据：Supabase (PostgREST + anon key + RLS permissive)
+// 跨设备：user_id 持久化在 localStorage
 
-const API_BASE = 'https://hua-web-api.onrender.com';  // 生产：Render Web Service；本地 dev 改 http://127.0.0.1:5000
+// 等待 supabase-client.js 加载完成
+const _supabase = window.supabase.createClient(
+  window.SUPABASE_CONFIG.url,
+  window.SUPABASE_CONFIG.anonKey
+);
 
 // ====== 用户标识 ======
 function getUserId() {
@@ -21,21 +26,14 @@ async function recordAnswer(cardId, notebook, rating) {
   // rating: 'know' | 'fuzzy' | 'unknow'
   const userId = getUserId();
   try {
-    const r = await fetch(`${API_BASE}/api/record`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        user_id: userId,
-        card_id: cardId,
-        notebook: notebook,
-        rating: rating
-      })
-    });
-    if (!r.ok) throw new Error('HTTP ' + r.status);
-    return await r.json();
+    const { data, error } = await _supabase
+      .from('records')
+      .insert({ user_id: userId, card_id: cardId, notebook, rating })
+      .select();
+    if (error) throw error;
+    return { ok: true, id: data[0]?.id, created_at: data[0]?.created_at };
   } catch (e) {
-    // 后端不通时降级到 localStorage
-    console.warn('API fail, fallback localStorage:', e);
+    console.warn('Supabase fail, fallback localStorage:', e);
     return recordLocal(cardId, notebook, rating);
   }
 }
@@ -55,10 +53,23 @@ function recordLocal(cardId, notebook, rating) {
 async function fetchStats() {
   const uid = getUserId();
   try {
-    const r = await fetch(`${API_BASE}/api/stats?user_id=${uid}`);
-    if (!r.ok) throw new Error('HTTP ' + r.status);
-    return await r.json();
+    // 统计：按 rating 分组计数
+    const { data, error } = await _supabase
+      .from('records')
+      .select('rating')
+      .eq('user_id', uid);
+    if (error) throw error;
+    const stats = { total: data.length, know: 0, fuzzy: 0, unknow: 0, wrong_cards: 0 };
+    const wrongSet = new Set();
+    for (const r of data) {
+      if (r.rating === 'know') stats.know++;
+      else if (r.rating === 'fuzzy') { stats.fuzzy++; wrongSet.add(r.card_id); }
+      else if (r.rating === 'unknow') { stats.unknow++; wrongSet.add(r.card_id); }
+    }
+    stats.wrong_cards = wrongSet.size;
+    return stats;
   } catch (e) {
+    console.warn('Supabase stats fail, fallback localStorage:', e);
     return computeLocalStats();
   }
 }
@@ -66,10 +77,23 @@ async function fetchStats() {
 async function fetchWrongCards() {
   const uid = getUserId();
   try {
-    const r = await fetch(`${API_BASE}/api/wrong-cards?user_id=${uid}`);
-    if (!r.ok) throw new Error('HTTP ' + r.status);
-    return await r.json();
+    // 错题：rating ∈ ('fuzzy', 'unknow')，按 card_id 聚合
+    const { data, error } = await _supabase
+      .from('records')
+      .select('card_id, notebook, rating, created_at')
+      .eq('user_id', uid)
+      .in('rating', ['fuzzy', 'unknow']);
+    if (error) throw error;
+    const cardMap = {};
+    for (const r of data) {
+      if (!cardMap[r.card_id]) cardMap[r.card_id] = { card_id: r.card_id, count: 0, notebook: r.notebook, last: r.created_at };
+      cardMap[r.card_id].count++;
+      if (r.created_at > cardMap[r.card_id].last) cardMap[r.card_id].last = r.created_at;
+    }
+    const wrong = Object.values(cardMap).sort((a, b) => b.count - a.count);
+    return { wrong, count: wrong.length };
   } catch (e) {
+    console.warn('Supabase wrong-cards fail, fallback localStorage:', e);
     return computeLocalWrong();
   }
 }
