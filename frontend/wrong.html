@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>错题本 · 华老师</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <div class="topbar">
+    <a class="back" href="index.html">←</a>
+    <h1>📒 错题本</h1>
+  </div>
+
+  <div class="container">
+    <div class="hero">
+      <h2 id="summary">加载中...</h2>
+      <p>按错题次数排序 · 优先复习高频错题</p>
+    </div>
+
+    <div id="wrong-list">
+      <div class="card" style="background: var(--bg); border-style: dashed;">
+        <div class="card-subtitle" style="text-align: center;">加载中...</div>
+      </div>
+    </div>
+
+    <div class="tip" style="margin-top: 24px;">
+      <strong>机制：</strong> 答错（不认识/模糊）的卡片自动进入此页。多次答错的排前面。
+    </div>
+    <div class="tip">
+      <strong>清除：</strong> 在闪卡复习中答对一张卡 3 次以上，错题记录会随时间衰减（未实现，目前需要手动）。
+    </div>
+  </div>
+
+  <script src="assets/data/flashcards.js"></script>
+  <script src="assets/js/app.js"></script>
+  <script>
+    const data = window.FLASHCARDS;
+    const cardById = {};
+    data.cards.forEach(c => { cardById[c.id] = c; });
+
+    (async function() {
+      const r = await fetchWrongCards();
+      const wrong = r.wrong || [];
+      const list = document.getElementById('wrong-list');
+      const summary = document.getElementById('summary');
+
+      if (wrong.length === 0) {
+        list.innerHTML = '<div class="card"><div class="card-subtitle" style="text-align: center; padding: 24px 0;">🎉 暂无错题！保持</div></div>';
+        summary.textContent = '🎉 0 个错题';
+        return;
+      }
+
+      summary.textContent = `📒 ${wrong.length} 个错题`;
+
+      list.innerHTML = wrong.map((w, i) => {
+        const c = cardById[w.card_id];
+        if (!c) return '';  // 卡片已删除
+        return `
+          <details class="card" ${i < 5 ? 'open' : ''}>
+            <summary>
+              <div class="card-title">${c.front.substring(0, 30)}${c.front.length > 30 ? '...' : ''}</div>
+              <div class="card-subtitle">${c.notebookTitle || c.notebook} · 错 ${w.count} 次</div>
+            </summary>
+            <div class="card-content" style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border);">
+              ${(c.back || '').replace(/\n/g, '<br>')}
+            </div>
+            <div style="margin-top: 12px;">
+              <a class="btn btn-primary" href="flashcard.html?notebook=${c.notebook}">📚 回该课复习</a>
+            </div>
+          </details>
+        `;
+      }).join('');
+    })();
+  </script>
+</body>
+</html>

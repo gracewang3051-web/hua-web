@@ -1,0 +1,30 @@
+services:
+  # 后端 Flask API
+  - type: web
+    name: hua-web-api
+    runtime: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: ADMIN_TOKEN
+        generateValue: true
+      - key: PYTHON_VERSION
+        value: 3.11.9
+    plan: free
+    healthCheckPath: /health
+
+  # 前端静态站
+  - type: web
+    name: hua-web
+    runtime: static
+    rootDir: frontend
+    buildCommand: ""
+    staticPublishPath: .
+    plan: free
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html

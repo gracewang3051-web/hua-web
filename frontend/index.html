@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>华老师导读 · 强化复习</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <div class="topbar">
+    <h1>🎓 华老师导读</h1>
+    <span class="badge" id="version-badge">v1.0</span>
+  </div>
+
+  <div class="container">
+    <div class="hero">
+      <h2>课程导读 · 闪卡强化</h2>
+      <p>听讲解 · 看逐字稿 · 闪卡复习 · 错题追踪</p>
+    </div>
+
+    <!-- 学习统计 -->
+    <div class="section-title">📊 学习统计</div>
+    <div class="stats-grid" id="stats-grid">
+      <div class="stat-card"><div class="stat-num" id="stat-total">-</div><div class="stat-label">总答题</div></div>
+      <div class="stat-card"><div class="stat-num" id="stat-know">-</div><div class="stat-label">认识</div></div>
+      <div class="stat-card"><div class="stat-num" id="stat-wrong">-</div><div class="stat-label">错题数</div></div>
+    </div>
+
+    <!-- 闪卡复习入口 -->
+    <div class="section-title">🃏 闪卡复习</div>
+    <a class="card" href="flashcard.html">
+      <div class="card-title">闪卡复习系统</div>
+      <div class="card-subtitle">570 张卡 · 11 节课 · 三档评分</div>
+      <div class="card-meta">
+        <span class="tag tag-success">含记录</span>
+        <span class="tag">支持按课筛选</span>
+      </div>
+    </a>
+
+    <a class="card" href="wrong.html">
+      <div class="card-title">📒 错题本</div>
+      <div class="card-subtitle">按错题次数排序 · 自动收集</div>
+      <div class="card-meta">
+        <span class="tag tag-warning">未掌握优先</span>
+      </div>
+    </a>
+
+    <!-- 课程列表 -->
+    <div class="section-title">📚 课程列表</div>
+    <div id="course-list">
+      <div class="card" style="background: var(--bg); border-style: dashed;">
+        <div class="card-subtitle" style="text-align: center;">正在加载课程列表...</div>
+      </div>
+    </div>
+
+    <div class="tip info" style="margin-top: 24px;">
+      <strong>使用流程：</strong> ① 选一节课 → ② 听 audio + 看 transcript → ③ 做闪卡 → ④ 错题自动入错题本
+    </div>
+    <div class="tip">
+      <strong>数据：</strong> 答题记录自动同步到云端（首次需配置 Neon DB）。未配置时本地存到浏览器。
+    </div>
+  </div>
+
+  <script src="assets/data/flashcards.js"></script>
+  <script src="assets/js/app.js"></script>
+  <script>
+    // 渲染课程列表
+    (function() {
+      const data = window.FLASHCARDS;
+      const list = document.getElementById('course-list');
+      if (!data) return;
+      list.innerHTML = '';
+      // 按 ID 顺序
+      const ids = Object.keys(data.notebooks);
+      ids.forEach(nb => {
+        const cardsInNb = data.cards.filter(c => c.notebook === nb).length;
+        const a = document.createElement('a');
+        a.className = 'card';
+        a.href = `course.html?id=${nb}`;
+        a.innerHTML = `
+          <div class="card-title">${data.notebooks[nb]}</div>
+          <div class="card-subtitle">${cardsInNb} 张闪卡 · 听讲解 + 做卡片</div>
+          <div class="card-meta">
+            <span class="tag tag-primary">${cardsInNb} 卡</span>
+            <span class="tag">音频 + 逐字稿</span>
+          </div>
+        `;
+        list.appendChild(a);
+      });
+    })();
+
+    // 加载统计
+    (function() {
+      fetchStats().then(s => {
+        document.getElementById('stat-total').textContent = s.total || 0;
+        document.getElementById('stat-know').textContent = s.know || 0;
+        document.getElementById('stat-wrong').textContent = s.wrong_cards || 0;
+      });
+    })();
+  </script>
+</body>
+</html>

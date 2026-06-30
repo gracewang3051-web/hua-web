@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>闪卡复习 · 华老师</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+  <style>
+    .rating-bar { display: flex; gap: 8px; margin-top: 16px; }
+    .rating-btn { flex: 1; padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 14px; cursor: pointer; }
+    .rating-btn.know { background: #a3b5a3; color: white; border: none; }
+    .rating-btn.fuzzy { background: #d4b896; color: white; border: none; }
+    .rating-btn.unknow { background: #c9826f; color: white; border: none; }
+    .session-stat { display: flex; gap: 12px; margin: 12px 0; font-size: 13px; }
+    .session-stat span { padding: 4px 10px; background: var(--bg); border-radius: 12px; }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <a class="back" href="index.html">←</a>
+    <h1>🃏 闪卡复习</h1>
+  </div>
+
+  <div class="container">
+    <div class="filters" id="filters">
+      <div class="filter-chip active" data-filter="all">全部</div>
+      <div class="filter-chip" data-filter="001">001</div>
+      <div class="filter-chip" data-filter="009">009</div>
+      <div class="filter-chip" data-filter="010">010</div>
+      <div class="filter-chip" data-filter="011">011</div>
+      <div class="filter-chip" data-filter="203a">203a</div>
+      <div class="filter-chip" data-filter="204">204</div>
+      <div class="filter-chip" data-filter="205">205</div>
+      <div class="filter-chip" data-filter="206">206</div>
+      <div class="filter-chip" data-filter="207">207</div>
+      <div class="filter-chip" data-filter="208">208</div>
+      <div class="filter-chip" data-filter="209">209</div>
+    </div>
+
+    <div class="session-stat">
+      <span>📊 本次 <b id="session-total">0</b></span>
+      <span>✓ 认识 <b id="session-know">0</b></span>
+      <span>△ 模糊 <b id="session-fuzzy">0</b></span>
+      <span>✗ 不认识 <b id="session-unknow">0</b></span>
+    </div>
+
+    <div class="progress" id="progress">0 / 0</div>
+
+    <div class="flashcard-container">
+      <div class="flashcard" id="card" onclick="flip()">
+        <div class="face front">
+          <div class="label">正面</div>
+          <div class="content" id="front">点击加载</div>
+          <div class="hint">点击卡片翻转 · 空格 = 翻面 · ← → 切换</div>
+        </div>
+        <div class="face back">
+          <div class="label">背面</div>
+          <div class="content" id="back">点击加载</div>
+          <div class="hint" id="back-hint"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 评分按钮（仅翻面后显示） -->
+    <div class="rating-bar" id="rating-bar" style="display:none;">
+      <button class="rating-btn unknow" onclick="rate('unknow')">✗ 不认识</button>
+      <button class="rating-btn fuzzy" onclick="rate('fuzzy')">△ 模糊</button>
+      <button class="rating-btn know" onclick="rate('know')">✓ 认识</button>
+    </div>
+
+    <div class="flashcard-controls" id="nav-controls">
+      <button class="btn" onclick="prev()">← 上一张</button>
+      <button class="btn btn-primary" onclick="next()">下一张 →</button>
+    </div>
+
+    <div class="tip" id="type-hint" style="margin-top: 16px;">
+      <strong>说明：</strong> 翻面后选三档评分。错题自动入 <a href="wrong.html">错题本</a>，换设备也同步。
+    </div>
+  </div>
+
+  <script src="assets/data/flashcards.js"></script>
+  <script src="assets/js/app.js"></script>
+  <script>
+    const data = window.FLASHCARDS;
+    let cards = data.cards.slice();
+    let idx = 0;
+    let notebookFilter = 'all';
+    let isFlipped = false;
+    const session = { total: 0, know: 0, fuzzy: 0, unknow: 0 };
+
+    // URL 参数支持
+    const urlParams = new URLSearchParams(location.search);
+    const initialNb = urlParams.get('notebook');
+    if (initialNb) {
+      notebookFilter = initialNb;
+      document.querySelectorAll('#filters .filter-chip').forEach(c => {
+        c.classList.toggle('active', c.dataset.filter === initialNb);
+      });
+    }
+
+    const card = document.getElementById('card');
+    const frontEl = document.getElementById('front');
+    const backEl = document.getElementById('back');
+    const backHint = document.getElementById('back-hint');
+    const progress = document.getElementById('progress');
+    const typeHint = document.getElementById('type-hint');
+    const ratingBar = document.getElementById('rating-bar');
+    const navControls = document.getElementById('nav-controls');
+
+    function applyFilter() {
+      cards = data.cards.filter(c => {
+        if (notebookFilter !== 'all' && c.notebook !== notebookFilter) return false;
+        return true;
+      });
+      idx = 0;
+      isFlipped = false;
+      render();
+    }
+
+    function render() {
+      if (cards.length === 0) {
+        frontEl.textContent = '无符合条件的卡';
+        backEl.textContent = '请调整筛选条件';
+        progress.textContent = '0 / 0';
+        ratingBar.style.display = 'none';
+        return;
+      }
+      const c = cards[idx];
+      isFlipped = false;
+      card.classList.remove('flipped');
+      frontEl.textContent = c.front;
+      backEl.innerHTML = (c.back || '').replace(/\n/g, '<br>');
+      backHint.textContent = `${c.notebookTitle || c.notebook} · ${c.id}`;
+      progress.textContent = `${idx + 1} / ${cards.length}`;
+      typeHint.innerHTML = `<strong>${c.notebookTitle || c.notebook}</strong> · ID: ${c.id}`;
+      ratingBar.style.display = 'none';
+      navControls.style.display = 'flex';
+    }
+
+    function flip() {
+      if (cards.length === 0) return;
+      isFlipped = !isFlipped;
+      card.classList.toggle('flipped', isFlipped);
+      if (isFlipped) {
+        ratingBar.style.display = 'flex';
+      } else {
+        ratingBar.style.display = 'none';
+      }
+    }
+
+    function next() {
+      if (cards.length === 0) return;
+      idx = (idx + 1) % cards.length;
+      render();
+    }
+
+    function prev() {
+      if (cards.length === 0) return;
+      idx = (idx - 1 + cards.length) % cards.length;
+      render();
+    }
+
+    async function rate(rating) {
+      const c = cards[idx];
+      session.total++;
+      session[rating]++;
+      document.getElementById('session-total').textContent = session.total;
+      document.getElementById(`session-${rating}`).textContent = session[rating];
+      // 上报
+      await recordAnswer(c.id, c.notebook, rating);
+      // 切到下一张
+      next();
+    }
+
+    // 键盘控制
+    document.addEventListener('keydown', e => {
+      if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); isFlipped ? next() : flip(); }
+      else if (e.key === 'ArrowLeft') { e.preventDefault(); prev(); }
+      else if (e.key === 'Enter' || e.key === 'f') { e.preventDefault(); flip(); }
+      else if (e.key === '1') { e.preventDefault(); if (isFlipped) rate('unknow'); }
+      else if (e.key === '2') { e.preventDefault(); if (isFlipped) rate('fuzzy'); }
+      else if (e.key === '3') { e.preventDefault(); if (isFlipped) rate('know'); }
+    });
+
+    // 滑动手势
+    let touchStartX = 0;
+    card.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, { passive: true });
+    card.addEventListener('touchend', e => {
+      const dx = e.changedTouches[0].clientX - touchStartX;
+      if (Math.abs(dx) > 50) {
+        if (dx < 0) next();
+        else prev();
+      }
+    }, { passive: true });
+
+    // 筛选器
+    document.querySelectorAll('#filters .filter-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        document.querySelectorAll('#filters .filter-chip').forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        notebookFilter = chip.dataset.filter;
+        applyFilter();
+      });
+    });
+
+    // 初始
+    applyFilter();
+  </script>
+</body>
+</html>

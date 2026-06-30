@@ -1,0 +1,485 @@
+/* 学习系统 - 主样式 */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+:root {
+  --primary: #2563eb;
+  --primary-light: #3b82f6;
+  --primary-dark: #1d4ed8;
+  --bg: #f8fafc;
+  --card: #ffffff;
+  --text: #1e293b;
+  --text-light: #64748b;
+  --border: #e2e8f0;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 25px -5px rgb(0 0 0 / 0.1);
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Helvetica Neue", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  min-height: 100vh;
+  padding-bottom: 60px;
+}
+
+/* 顶部导航 */
+.topbar {
+  position: sticky;
+  top: 0;
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  z-index: 100;
+  box-shadow: var(--shadow);
+}
+
+.topbar .back {
+  color: var(--primary);
+  text-decoration: none;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 12px;
+  margin-right: 8px;
+  border-radius: 6px;
+}
+
+.topbar .back:active {
+  background: var(--bg);
+}
+
+.topbar h1 {
+  font-size: 17px;
+  font-weight: 600;
+  flex: 1;
+}
+
+.topbar .badge {
+  background: var(--primary);
+  color: white;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+/* 容器 */
+.container {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+/* 标题区 */
+.hero {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+  color: white;
+  padding: 32px 20px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  text-align: center;
+  box-shadow: var(--shadow-lg);
+}
+
+.hero h2 {
+  font-size: 22px;
+  margin-bottom: 8px;
+  font-weight: 700;
+}
+
+.hero p {
+  font-size: 14px;
+  opacity: 0.95;
+}
+
+/* 卡片 */
+.card {
+  background: var(--card);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  text-decoration: none;
+  color: var(--text);
+  display: block;
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+
+.card:active {
+  transform: scale(0.98);
+}
+
+.card .card-title {
+  font-size: 17px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.card .card-subtitle {
+  font-size: 13px;
+  color: var(--text-light);
+  margin-bottom: 12px;
+}
+
+.card .card-meta {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.tag {
+  display: inline-block;
+  background: var(--bg);
+  color: var(--text-light);
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.tag-primary { background: #dbeafe; color: var(--primary-dark); }
+.tag-success { background: #d1fae5; color: #065f46; }
+.tag-warning { background: #fef3c7; color: #92400e; }
+
+/* 列表 */
+.section-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  margin: 24px 0 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.section-title::before {
+  content: "";
+  width: 4px;
+  height: 16px;
+  background: var(--primary);
+  border-radius: 2px;
+}
+
+/* 板块列表（passage 页） */
+.section-item {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.section-item:hover {
+  border-color: var(--primary-light);
+}
+
+.section-item.active {
+  border-color: var(--primary);
+  background: #eff6ff;
+}
+
+.section-item .idx {
+  width: 28px;
+  height: 28px;
+  background: var(--primary);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 600;
+  margin-right: 12px;
+  flex-shrink: 0;
+}
+
+.section-item .info {
+  flex: 1;
+  min-width: 0;
+}
+
+.section-item .info .title {
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.section-item .info .meta {
+  font-size: 12px;
+  color: var(--text-light);
+  margin-top: 2px;
+}
+
+.section-item .duration {
+  font-size: 12px;
+  color: var(--text-light);
+  margin-left: 8px;
+  flex-shrink: 0;
+}
+
+/* 音频播放器 */
+.audio-player {
+  background: var(--card);
+  border-radius: 12px;
+  padding: 20px 16px;
+  box-shadow: var(--shadow-lg);
+  margin-bottom: 16px;
+  border: 1px solid var(--border);
+}
+
+.audio-player .title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.audio-player .subtitle {
+  font-size: 13px;
+  color: var(--text-light);
+  margin-bottom: 16px;
+}
+
+.audio-player audio {
+  width: 100%;
+  border-radius: 8px;
+}
+
+.audio-player .controls-hint {
+  margin-top: 12px;
+  font-size: 12px;
+  color: var(--text-light);
+  text-align: center;
+}
+
+/* 闪卡 */
+.flashcard-container {
+  perspective: 1000px;
+  margin-bottom: 16px;
+}
+
+.flashcard {
+  position: relative;
+  width: 100%;
+  height: 360px;
+  transition: transform 0.6s;
+  transform-style: preserve-3d;
+  cursor: pointer;
+  margin-bottom: 16px;
+}
+
+.flashcard.flipped {
+  transform: rotateY(180deg);
+}
+
+.flashcard .face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  background: var(--card);
+  border-radius: 16px;
+  padding: 32px 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--border);
+}
+
+.flashcard .face.back {
+  transform: rotateY(180deg);
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+}
+
+.flashcard .face .label {
+  font-size: 12px;
+  color: var(--text-light);
+  margin-bottom: 16px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.flashcard .face .content {
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.5;
+  white-space: pre-line;
+  word-wrap: break-word;
+}
+
+.flashcard .face.back .content {
+  font-size: 16px;
+  font-weight: 500;
+  text-align: left;
+  white-space: pre-line;
+  width: 100%;
+}
+
+.flashcard .face .hint {
+  margin-top: 16px;
+  font-size: 12px;
+  color: var(--text-light);
+}
+
+/* 闪卡控制 */
+.flashcard-controls {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.btn {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  background: var(--card);
+  color: var(--text);
+  border: 1px solid var(--border);
+  transition: all 0.15s;
+}
+
+.btn:active {
+  transform: scale(0.97);
+}
+
+.btn-primary {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+.btn-primary:active {
+  background: var(--primary-dark);
+}
+
+/* 过滤器 */
+.filters {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.filter-chip {
+  padding: 6px 14px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  font-size: 13px;
+  white-space: nowrap;
+  cursor: pointer;
+  color: var(--text);
+}
+
+.filter-chip.active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+/* 进度 */
+.progress {
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-light);
+  margin-bottom: 12px;
+}
+
+/* 资源库 */
+.resource-item {
+  display: flex;
+  align-items: center;
+  padding: 14px 16px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin-bottom: 8px;
+  text-decoration: none;
+  color: var(--text);
+  transition: all 0.15s;
+}
+
+.resource-item:active {
+  transform: scale(0.99);
+  background: var(--bg);
+}
+
+.resource-item .icon {
+  width: 36px;
+  height: 36px;
+  background: var(--bg);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  margin-right: 12px;
+}
+
+.resource-item .info {
+  flex: 1;
+}
+
+.resource-item .info .title {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.resource-item .info .desc {
+  font-size: 12px;
+  color: var(--text-light);
+  margin-top: 2px;
+}
+
+/* 提示条 */
+.tip {
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 10px;
+  padding: 12px 16px;
+  font-size: 13px;
+  color: #92400e;
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+
+.tip.info {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+  color: #1e40af;
+}
+
+/* 响应式 */
+@media (max-width: 480px) {
+  .container { padding: 12px; }
+  .hero { padding: 24px 16px; }
+  .hero h2 { font-size: 19px; }
+  .flashcard { height: 320px; }
+  .flashcard .face .content { font-size: 18px; }
+  .flashcard .face.back .content { font-size: 14px; }
+}

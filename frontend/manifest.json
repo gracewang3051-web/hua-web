@@ -1,0 +1,9 @@
+{
+  "name": "华老师导读强化",
+  "short_name": "华老师",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#f4f1ea",
+  "theme_color": "#a3b5a3",
+  "icons": []
+}

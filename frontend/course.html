@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>课程详情</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <div class="topbar">
+    <a class="back" href="index.html">←</a>
+    <h1 id="course-title">课程详情</h1>
+  </div>
+
+  <div class="container">
+    <div class="hero">
+      <h2 id="course-name">加载中...</h2>
+      <p id="course-meta">11 节课 · 11 段音频 · 逐字稿</p>
+    </div>
+
+    <!-- 音频播放器 -->
+    <div class="section-title">🎧 听讲解</div>
+    <div class="card" id="audio-card">
+      <audio id="audio-player" controls preload="metadata" style="width: 100%;">
+        您的浏览器不支持 audio 标签。
+      </audio>
+      <div class="card-subtitle" id="audio-info" style="margin-top: 8px;">加载中...</div>
+    </div>
+
+    <!-- 逐字稿 -->
+    <div class="section-title">📝 逐字稿</div>
+    <div class="card" id="transcript-card">
+      <div class="card-subtitle" id="transcript-loading">加载中...</div>
+    </div>
+
+    <!-- 闪卡入口 -->
+    <div class="section-title">🃏 闪卡复习（仅本课）</div>
+    <a class="card" id="flashcard-link" href="#">
+      <div class="card-title">本课闪卡</div>
+      <div class="card-subtitle" id="flashcard-sub">点击进入复习</div>
+      <div class="card-meta">
+        <span class="tag tag-success">含记录</span>
+        <span class="tag">三档评分</span>
+      </div>
+    </a>
+
+    <!-- 全局闪卡 -->
+    <a class="card" href="flashcard.html">
+      <div class="card-title">全 11 节课闪卡</div>
+      <div class="card-subtitle">570 张 · 跨课筛选</div>
+    </a>
+  </div>
+
+  <script src="assets/data/flashcards.js"></script>
+  <script src="assets/js/app.js"></script>
+  <script>
+    // 解析 URL 参数
+    const params = new URLSearchParams(location.search);
+    const nb = params.get('id') || '001';
+    const data = window.FLASHCARDS;
+    const title = data.notebooks[nb] || `华老师-${nb}`;
+
+    document.getElementById('course-title').textContent = title;
+    document.getElementById('course-name').textContent = title;
+    const cards = data.cards.filter(c => c.notebook === nb);
+    document.getElementById('course-meta').textContent = `${cards.length} 张闪卡 · 11 节课系列`;
+    document.getElementById('flashcard-sub').textContent = `仅显示本课 ${cards.length} 张 · 答题记录自动同步`;
+
+    // audio
+    const audio = document.getElementById('audio-player');
+    audio.src = `assets/audio/${nb}.mp3`;
+    document.getElementById('audio-info').textContent = `${nb}.mp3 · 加载中...`;
+    audio.addEventListener('loadedmetadata', () => {
+      const dur = Math.round(audio.duration);
+      const m = Math.floor(dur/60), s = dur%60;
+      document.getElementById('audio-info').textContent = `${nb}.mp3 · ${m}分${s}秒 · ${(audio.duration*128/8/1024).toFixed(0)}KB/s`;
+    });
+
+    // flashcard link
+    document.getElementById('flashcard-link').href = `flashcard.html?notebook=${nb}`;
+
+    // transcript 加载（从 .md 转 inline 渲染）
+    fetch(`assets/transcripts/${nb}.md`).then(r => {
+      if (!r.ok) throw new Error('no transcript');
+      return r.text();
+    }).then(md => {
+      const card = document.getElementById('transcript-card');
+      card.innerHTML = `<details><summary>点击展开逐字稿 · ${md.length} 字符</summary><pre style="white-space: pre-wrap; font-family: -apple-system, sans-serif; font-size: 14px; line-height: 1.7; max-height: 60vh; overflow-y: auto; margin-top: 12px;">${md.replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}</pre></details>`;
+    }).catch(() => {
+      document.getElementById('transcript-card').innerHTML = '<div class="card-subtitle">该课暂无逐字稿</div>';
+    });
+  </script>
+</body>
+</html>

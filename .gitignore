@@ -1,0 +1,19 @@
+# Python
+backend/venv/
+backend/__pycache__/
+*.pyc
+*.pyo
+
+# Env
+.env
+.env.local
+
+# OS
+.DS_Store
+
+# IDE
+.idea/
+.vscode/
+
+# Audio (large files, served via GitHub Releases)
+frontend/assets/audio/
