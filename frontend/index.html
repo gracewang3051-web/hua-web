@@ -32,7 +32,7 @@
     <div class="section-title">🃏 闪卡复习</div>
     <a class="card" href="flashcard.html">
       <div class="card-title">闪卡复习系统</div>
-      <div class="card-subtitle">570 张卡 · 11 节课 · 三档评分</div>
+      <div class="card-subtitle">625 张卡 · 13 节课/文言文 · 三档评分</div>
       <div class="card-meta">
         <span class="tag tag-success">含记录</span>
         <span class="tag">支持按课筛选</span>
@@ -47,7 +47,7 @@
       </div>
     </a>
 
-    <!-- 课程列表 -->
+    <!-- 课程列表（含文言文） -->
     <div class="section-title">📚 课程列表</div>
     <div id="course-list">
       <div class="card" style="background: var(--bg); border-style: dashed;">
@@ -80,7 +80,8 @@
         const cardsInNb = data.cards.filter(c => c.notebook === nb).length;
         const a = document.createElement('a');
         a.className = 'card';
-        a.href = `course.html?id=${nb}`;
+        const isPassage = nb.startsWith('p');
+        a.href = isPassage ? `passage.html?id=${nb}` : `course.html?id=${nb}`;
         a.innerHTML = `
           <div class="card-title">${data.notebooks[nb]}</div>
           <div class="card-subtitle">${cardsInNb} 张闪卡 · 听讲解 + 做卡片</div>

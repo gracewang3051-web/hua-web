@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>听播客</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <div class="topbar">
+    <a class="back" href="index.html">←</a>
+    <h1 id="passage-title">加载中…</h1>
+  </div>
+
+  <div class="container">
+    <div class="audio-player">
+      <div class="title" id="section-title">选择板块</div>
+      <div class="subtitle" id="section-desc">从下方列表选一个板块开始听</div>
+      <audio id="audio" controls preload="metadata">
+        <source id="audio-source" src="" type="audio/mpeg">
+        浏览器不支持音频
+      </audio>
+      <div class="controls-hint" id="duration-hint">提示：每个板块含 15 秒「暂停思考」位，孩子可按暂停键</div>
+    </div>
+
+    <div class="tip info">
+      <strong>学习流程：</strong><br>
+      1. 选一个板块开始听<br>
+      2. 听到「现在请你按暂停键」→ 暂停思考 15-30 秒<br>
+      3. 想好后按继续听「揭晓」<br>
+      4. 听完整板块后做积累本 + 闪卡
+    </div>
+
+    <div class="section-title">📋 板块列表（按顺序听）</div>
+    <div id="section-list"></div>
+
+    <div class="section-title" style="margin-top: 24px;">📚 配套资料</div>
+    <a class="resource-item" id="knowledge-link" href="#">
+      <div class="icon">📋</div>
+      <div class="info">
+        <div class="title">考点清单</div>
+        <div class="desc">听完后复习用</div>
+      </div>
+    </a>
+    <a class="resource-item" id="original-link" href="#">
+      <div class="icon">📜</div>
+      <div class="info">
+        <div class="title">原文 + 拼音标注</div>
+        <div class="desc">跟读 / 抄写用</div>
+      </div>
+    </a>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/js/supabase-config.js"></script>
+  <script src="assets/js/app.js"></script>
+  <script src="assets/data/passage-info.js"></script>
+  <script src="assets/js/passage.js"></script>
+</body>
+</html>
