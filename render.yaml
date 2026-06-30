@@ -17,7 +17,7 @@ services:
     healthCheckPath: /health
 
   # 前端静态站
-  - type: web
+  - type: static
     name: hua-web
     runtime: static
     rootDir: frontend

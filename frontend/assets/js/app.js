@@ -1,7 +1,7 @@
 // 华老师导读强化应用 · 公共脚本
 // 功能：user_id 持久化、API 调用、统计刷新
 
-const API_BASE = '';  // 同域部署，不需要跨域；本地用 5000 时改 http://127.0.0.1:5000
+const API_BASE = 'https://hua-web-api.onrender.com';  // 生产：Render Web Service；本地 dev 改 http://127.0.0.1:5000
 
 // ====== 用户标识 ======
 function getUserId() {
