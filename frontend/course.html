@@ -110,6 +110,36 @@ document.addEventListener("DOMContentLoaded", function() {
       document.getElementById('transcript-card').innerHTML = '<div class="card-subtitle">该课暂无逐字稿</div>';
     });
 
+    // AI 摘要播客加载 (NotebookLM AI 主持人对话音频)
+    fetch(`assets/audio/ai-podcast/${nb}.mp3`, { method: 'HEAD' }).then(r => {
+      if (r.ok) {
+        const card = document.getElementById('ai-podcast-card');
+        card.innerHTML = `
+          <audio id="ai-podcast-player" controls preload="none" style="width: 100%;">
+            您的浏览器不支持 audio 标签。
+          </audio>
+          <div class="card-subtitle" style="margin-top: 8px;">${nb}.mp3 · NotebookLM AI 摘要播客 · 加载中...</div>
+        `;
+        const audioEl = document.getElementById('ai-podcast-player');
+        audioEl.dataset.src = `assets/audio/ai-podcast/${nb}.mp3`;
+        audioEl.addEventListener('play', function once() {
+          if (!audioEl.src || audioEl.src === window.location.href) {
+            audioEl.src = audioEl.dataset.src;
+          }
+          audioEl.removeEventListener('play', once);
+        }, { once: true });
+        audioEl.addEventListener('loadedmetadata', () => {
+          const dur = Math.round(audioEl.duration);
+          const m = Math.floor(dur/60), s = dur%60;
+          card.querySelector('.card-subtitle').textContent = `${nb}.mp3 · AI 主持人对话 · ${m}分${s}秒`;
+        });
+      } else {
+        document.getElementById('ai-podcast-card').innerHTML = '<div class="card-subtitle">该课暂无 AI 摘要播客</div>';
+      }
+    }).catch(() => {
+      document.getElementById('ai-podcast-card').innerHTML = '<div class="card-subtitle">该课暂无 AI 摘要播客</div>';
+    });
+
     // AI 学习报告加载（NotebookLM 生成的 markdown 报告）
     fetch(`assets/reports/${nb}.md`).then(r => {
       if (!r.ok) throw new Error('no report');
