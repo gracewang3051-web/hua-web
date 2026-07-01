@@ -19,3 +19,7 @@ backend/__pycache__/
 
 # Avoid accidentally committing bulk card data dumps
 frontend/assets/data/flashcards/
+
+# 备份目录
+frontend/assets/transcripts/_backup_*/
+_whisper_test/
