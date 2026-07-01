@@ -16,3 +16,6 @@ backend/__pycache__/
 .vscode/
 
 # Audio served from Render static site (in repo, not GitHub Releases)
+
+# Avoid accidentally committing bulk card data dumps
+frontend/assets/data/flashcards/
