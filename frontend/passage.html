@@ -17,7 +17,7 @@
     <div class="audio-player">
       <div class="title" id="section-title">选择板块</div>
       <div class="subtitle" id="section-desc">从下方列表选一个板块开始听</div>
-      <audio id="audio" controls preload="metadata">
+      <audio id="audio" controls preload="none">
         <source id="audio-source" src="" type="audio/mpeg">
         浏览器不支持音频
       </audio>
@@ -52,10 +52,10 @@
     </a>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="assets/js/supabase-config.js"></script>
-  <script src="assets/js/app.js"></script>
-  <script src="assets/data/passage-info.js"></script>
-  <script src="assets/js/passage.js"></script>
+  <script defer src="assets/js/supabase.min.js"></script>
+  <script defer src="assets/js/supabase-config.js"></script>
+  <script defer src="assets/js/app.js"></script>
+  <script defer src="assets/data/passage-info.js"></script>
+  <script defer src="assets/js/passage.js"></script>
 </body>
 </html>

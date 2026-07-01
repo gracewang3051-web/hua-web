@@ -79,11 +79,13 @@
     </div>
   </div>
 
-  <script src="assets/data/flashcards.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="assets/js/supabase-config.js"></script>
-  <script src="assets/js/app.js"></script>
+  <script defer src="assets/data/flashcards-full.js"></script>
+  <script defer src="assets/js/supabase.min.js"></script>
+  <script defer src="assets/js/supabase-config.js"></script>
+  <script defer src="assets/js/app.js"></script>
   <script>
+document.addEventListener("DOMContentLoaded", function() {
+
     const data = window.FLASHCARDS;
     let cards = data.cards.slice();
     let idx = 0;
@@ -208,6 +210,8 @@
 
     // 初始
     applyFilter();
-  </script>
+  
+});
+</script>
 </body>
 </html>

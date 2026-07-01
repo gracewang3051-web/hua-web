@@ -22,7 +22,7 @@
     <!-- 音频播放器 -->
     <div class="section-title">🎧 听讲解</div>
     <div class="card" id="audio-card">
-      <audio id="audio-player" controls preload="metadata" style="width: 100%;">
+      <audio id="audio-player" controls preload="none" style="width: 100%;">
         您的浏览器不支持 audio 标签。
       </audio>
       <div class="card-subtitle" id="audio-info" style="margin-top: 8px;">加载中...</div>
@@ -52,26 +52,35 @@
     </a>
   </div>
 
-  <script src="assets/data/flashcards.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="assets/js/supabase-config.js"></script>
-  <script src="assets/js/app.js"></script>
+  <script defer src="assets/data/flashcards-index.js"></script>
+  <script defer src="assets/js/supabase.min.js"></script>
+  <script defer src="assets/js/supabase-config.js"></script>
+  <script defer src="assets/js/app.js"></script>
   <script>
+document.addEventListener("DOMContentLoaded", function() {
+
     // 解析 URL 参数
     const params = new URLSearchParams(location.search);
     const nb = params.get('id') || '001';
-    const data = window.FLASHCARDS;
+    const data = window.FLASHCARDS_INDEX;
     const title = data.notebooks[nb] || `华老师-${nb}`;
 
     document.getElementById('course-title').textContent = title;
     document.getElementById('course-name').textContent = title;
-    const cards = data.cards.filter(c => c.notebook === nb);
-    document.getElementById('course-meta').textContent = `${cards.length} 张闪卡 · 11 节课系列`;
-    document.getElementById('flashcard-sub').textContent = `仅显示本课 ${cards.length} 张 · 答题记录自动同步`;
+    const cardsInNb = data.cardsByNotebook[nb] || 0; // v1.2: index 仅含 notebooks 列表, 完整卡数据在 flashcard.html 加载
+    document.getElementById('course-meta').textContent = `${cardsInNb} 张闪卡 · 11 节课系列`;
+    document.getElementById('flashcard-sub').textContent = `仅显示本课 ${cardsInNb} 张 · 答题记录自动同步`;
 
     // audio
     const audio = document.getElementById('audio-player');
-    audio.src = `assets/audio/${nb}.mp3`; // v1.2: served from Render (in repo), not GitHub Releases
+    // v1.2: src 留空, 用户点 ▶ 才加载 (避免 Render 海外 1s metadata 拉取阻塞首屏)
+    audio.dataset.src = `assets/audio/${nb}.mp3`;
+    audio.addEventListener('play', function once() {
+      if (!audio.src || audio.src === window.location.href) {
+        audio.src = audio.dataset.src;
+      }
+      audio.removeEventListener('play', once);
+    }, { once: true }); // v1.2: served from Render (in repo), not GitHub Releases
     document.getElementById('audio-info').textContent = `${nb}.mp3 · 加载中...`;
     audio.addEventListener('loadedmetadata', () => {
       const dur = Math.round(audio.duration);
@@ -92,6 +101,8 @@
     }).catch(() => {
       document.getElementById('transcript-card').innerHTML = '<div class="card-subtitle">该课暂无逐字稿</div>';
     });
-  </script>
+  
+});
+</script>
 </body>
 </html>
