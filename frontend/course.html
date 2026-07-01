@@ -28,11 +28,7 @@
       <div class="card-subtitle" id="audio-info" style="margin-top: 8px;">加载中...</div>
     </div>
 
-    <!-- 逐字稿 -->
-    <div class="section-title">📝 逐字稿</div>
-    <div class="card" id="transcript-card">
-      <div class="card-subtitle" id="transcript-loading">加载中...</div>
-    </div>
+
 
     <!-- AI 学习报告 -->
     <div class="section-title">📑 AI 学习报告</div>
@@ -50,6 +46,12 @@
         <span class="tag">三档评分</span>
       </div>
     </a>
+
+    <!-- 参考资料（原始逐字稿, 内容精简降级） -->
+    <div class="section-title">📚 参考资料</div>
+    <div class="card" id="transcript-card">
+      <div class="card-subtitle" id="transcript-loading">加载中...</div>
+    </div>
 
     <!-- 全局闪卡 -->
     <a class="card" href="flashcard.html">
@@ -74,7 +76,7 @@ document.addEventListener("DOMContentLoaded", function() {
     document.getElementById('course-title').textContent = title;
     document.getElementById('course-name').textContent = title;
     const cardsInNb = data.cardsByNotebook[nb] || 0; // v1.2: index 仅含 notebooks 列表, 完整卡数据在 flashcard.html 加载
-    document.getElementById('course-meta').textContent = `${cardsInNb} 张闪卡 · 11 节课 · 逐字稿 + AI 报告`;
+    document.getElementById('course-meta').textContent = `${cardsInNb} 张闪卡 · 11 节课 · AI 报告 + 参考资料`;
     document.getElementById('flashcard-sub').textContent = `仅显示本课 ${cardsInNb} 张 · 答题记录自动同步`;
 
     // audio
