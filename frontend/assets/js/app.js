@@ -74,6 +74,49 @@ async function fetchStats() {
   }
 }
 
+// 按课统计：每课的答题分布
+async function fetchNotebookStats() {
+  const uid = getUserId();
+  try {
+    const { data, error } = await _supabase
+      .from('records')
+      .select('notebook, rating, card_id')
+      .eq('user_id', uid);
+    if (error) throw error;
+    const byNb = {};
+    for (const r of data) {
+      const nb = r.notebook || 'unknown';
+      if (!byNb[nb]) byNb[nb] = { total: 0, know: 0, fuzzy: 0, unknow: 0 };
+      byNb[nb].total++;
+      if (r.rating === 'know') byNb[nb].know++;
+      else if (r.rating === 'fuzzy') byNb[nb].fuzzy++;
+      else if (r.rating === 'unknow') byNb[nb].unknow++;
+    }
+    return byNb;
+  } catch (e) {
+    console.warn('Supabase notebook stats fail, fallback localStorage:', e);
+    return computeLocalNotebookStats();
+  }
+}
+
+function computeLocalNotebookStats() {
+  const byNb = {};
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (!key || !key.startsWith('hua_local_')) continue;
+    try {
+      const v = JSON.parse(localStorage.getItem(key) || '{}');
+      const nb = v.notebook || 'unknown';
+      if (!byNb[nb]) byNb[nb] = { total: 0, know: 0, fuzzy: 0, unknow: 0 };
+      byNb[nb].total++;
+      if (v.rating === 'know') byNb[nb].know++;
+      else if (v.rating === 'fuzzy') byNb[nb].fuzzy++;
+      else if (v.rating === 'unknow') byNb[nb].unknow++;
+    } catch {}
+  }
+  return byNb;
+}
+
 async function fetchWrongCards() {
   const uid = getUserId();
   try {

@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>学习记录 · 华老师</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+  <style>
+    .stat-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0; }
+    .stat-big { background: var(--card-bg); padding: 16px; border-radius: 12px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+    .stat-big .num { font-size: 32px; font-weight: 700; color: var(--primary); margin-bottom: 4px; }
+    .stat-big .lbl { font-size: 13px; color: var(--text-muted); }
+    .nb-row { display: flex; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); gap: 12px; }
+    .nb-row:last-child { border-bottom: none; }
+    .nb-name { flex: 0 0 90px; font-size: 14px; }
+    .nb-bar-wrap { flex: 1; height: 16px; background: var(--bg); border-radius: 8px; overflow: hidden; position: relative; }
+    .nb-bar { height: 100%; background: var(--primary); border-radius: 8px; transition: width 0.6s ease; }
+    .nb-bar.know { background: #a3b5a3; }
+    .nb-count { flex: 0 0 60px; text-align: right; font-size: 13px; color: var(--text-muted); }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <a class="back" href="index.html">←</a>
+    <h1>📊 学习记录</h1>
+  </div>
+
+  <div class="container">
+    <div class="hero">
+      <h2 id="uid-display">本机用户</h2>
+      <p id="last-update">加载中...</p>
+    </div>
+
+    <!-- 4 大数字 -->
+    <div class="section-title">📈 总体数据</div>
+    <div class="stat-row">
+      <div class="stat-big"><div class="num" id="s-total">-</div><div class="lbl">总答题数</div></div>
+      <div class="stat-big"><div class="num" id="s-know">-</div><div class="lbl">认识 ✓</div></div>
+    </div>
+    <div class="stat-row">
+      <div class="stat-big"><div class="num" id="s-fuzzy">-</div><div class="lbl">模糊 △</div></div>
+      <div class="stat-big"><div class="num" id="s-wrong">-</div><div class="lbl">不认识 ✗</div></div>
+    </div>
+
+    <!-- 错题相关 -->
+    <div class="section-title">📒 错题</div>
+    <div class="stat-row">
+      <div class="stat-big"><div class="num" id="s-wrong-cards">-</div><div class="lbl">错题卡片</div></div>
+      <div class="stat-big"><div class="num" id="s-accuracy">-</div><div class="lbl">正确率</div></div>
+    </div>
+
+    <!-- 按课统计 -->
+    <div class="section-title">📚 按课分布</div>
+    <div class="card" id="nb-stats-card">
+      <div class="card-subtitle" id="nb-loading">加载中...</div>
+    </div>
+
+    <!-- 跳转入口 -->
+    <div class="section-title">🔗 相关入口</div>
+    <a class="card" href="wrong.html">
+      <div class="card-title">📒 错题本</div>
+      <div class="card-subtitle">按错题次数排序 · 重点复习</div>
+    </a>
+    <a class="card" href="flashcard.html">
+      <div class="card-title">🃏 继续复习</div>
+      <div class="card-subtitle">按课筛选 · 三档评分</div>
+    </a>
+
+    <div class="tip" style="margin-top: 24px;">
+      <strong>说明：</strong> 数据保存在云端，跨设备同步。同一浏览器共用 UUID（localStorage）。
+      清浏览器数据会重置本地 UUID，云端历史记录会变成匿名档。
+    </div>
+  </div>
+
+  <script defer src="assets/js/supabase.min.js"></script>
+  <script defer src="assets/js/supabase-config.js"></script>
+  <script defer src="assets/js/app.js"></script>
+  <script>
+document.addEventListener("DOMContentLoaded", function() {
+
+    // 显示当前 uid (短码)
+    const uid = (window.getUserId && window.getUserId()) || 'unknown';
+    document.getElementById('uid-display').textContent = `用户 ${uid.substring(0, 8)}`;
+
+    // 加载总体统计
+    Promise.all([fetchStats(), fetchNotebookStats()]).then(([stats, byNb]) => {
+      document.getElementById('s-total').textContent = stats.total || 0;
+      document.getElementById('s-know').textContent = stats.know || 0;
+      document.getElementById('s-fuzzy').textContent = stats.fuzzy || 0;
+      document.getElementById('s-unknow') && (document.getElementById('s-unknow').textContent = stats.unknow || 0);
+      document.getElementById('s-wrong-cards').textContent = stats.wrong_cards || 0;
+
+      // 正确率
+      const acc = stats.total ? Math.round(stats.know * 100 / stats.total) : 0;
+      document.getElementById('s-accuracy').textContent = acc + '%';
+
+      // 最后更新时间
+      document.getElementById('last-update').textContent = `共 ${stats.total} 次答题`;
+
+      // 按课分布
+      const card = document.getElementById('nb-stats-card');
+      const keys = Object.keys(byNb);
+      if (keys.length === 0) {
+        card.innerHTML = '<div class="card-subtitle" style="text-align:center; padding: 16px;">还没答题数据，做几张闪卡后再来看 📊</div>';
+        return;
+      }
+
+      // 按 total 降序排
+      keys.sort((a, b) => byNb[b].total - byNb[a].total);
+      const max = Math.max(...keys.map(k => byNb[k].total));
+
+      const FLASHCARDS_INDEX = window.FLASHCARDS_INDEX || { notebooks: {} };
+      card.innerHTML = keys.map(nb => {
+        const s2 = byNb[nb];
+        const title = (FLASHCARDS_INDEX.notebooks && FLASHCARDS_INDEX.notebooks[nb]) || `课程-${nb}`;
+        const knowPct = s2.total ? Math.round(s2.know * 100 / s2.total) : 0;
+        return `
+          <div class="nb-row">
+            <div class="nb-name">${title.substring(0, 10)}${title.length > 10 ? '…' : ''}</div>
+            <div class="nb-bar-wrap"><div class="nb-bar know" style="width: ${(s2.total / max * 100).toFixed(0)}%"></div></div>
+            <div class="nb-count">${s2.total} 答 · ${knowPct}%✓</div>
+          </div>
+        `;
+      }).join('');
+    });
+
+});
+  </script>
+</body>
+</html>

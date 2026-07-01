@@ -20,13 +20,15 @@
       <p>听讲解 · 看逐字稿 · 闪卡复习 · 错题追踪</p>
     </div>
 
-    <!-- 学习统计 -->
-    <div class="section-title">📊 学习统计</div>
-    <div class="stats-grid" id="stats-grid">
-      <div class="stat-card"><div class="stat-num" id="stat-total">-</div><div class="stat-label">总答题</div></div>
-      <div class="stat-card"><div class="stat-num" id="stat-know">-</div><div class="stat-label">认识</div></div>
-      <div class="stat-card"><div class="stat-num" id="stat-wrong">-</div><div class="stat-label">错题数</div></div>
-    </div>
+    <!-- 学习记录入口 (跳转界面, 不直接展示统计数据) -->
+    <a class="card" href="stats.html">
+      <div class="card-title">📊 学习记录</div>
+      <div class="card-subtitle">查看答题数据 · 按课分布 · 错题分析</div>
+      <div class="card-meta">
+        <span class="tag tag-primary">个人数据</span>
+        <span class="tag">按课分布</span>
+      </div>
+    </a>
 
     <!-- 闪卡复习入口 -->
     <div class="section-title">🃏 闪卡复习</div>
@@ -96,14 +98,7 @@ document.addEventListener("DOMContentLoaded", function() {
       });
     })();
 
-    // 加载统计
-    (function() {
-      fetchStats().then(s => {
-        document.getElementById('stat-total').textContent = s.total || 0;
-        document.getElementById('stat-know').textContent = s.know || 0;
-        document.getElementById('stat-wrong').textContent = s.wrong_cards || 0;
-      });
-    })();
+    // 学习统计移到 stats.html, 首页不再调 fetchStats (避免暴露数据 + 减少首屏请求)
   
 });
 </script>
