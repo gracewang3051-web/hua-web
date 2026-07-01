@@ -15,5 +15,4 @@ backend/__pycache__/
 .idea/
 .vscode/
 
-# Audio (large files, served via GitHub Releases)
-frontend/assets/audio/
+# Audio served from Render static site (in repo, not GitHub Releases)
