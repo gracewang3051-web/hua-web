@@ -63,7 +63,7 @@ if (!info) {
     const s = sections[idx];
     sectionTitle.textContent = `${idx + 1}. ${s.title}`;
     sectionDesc.textContent = s.desc;
-    audioSrc.src = `https://github.com/gracewang3051-web/hua-web/releases/download/v1.1.0/${encodeURIComponent(s.file)}`;
+    audioSrc.src = `assets/audio/${s.file}`; // v1.2: served from Render (in repo), not GitHub Releases
     audio.load();
     audio.play().catch(e => {
       // 移动端需要用户交互才能播放
