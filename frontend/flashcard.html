@@ -117,6 +117,36 @@
       next();
     }
 
+    function applyFilter() {
+      cards = data.cards.filter(c => {
+        if (notebookFilter !== 'all' && c.notebook !== notebookFilter) return false;
+        return true;
+      });
+      idx = 0;
+      isFlipped = false;
+      render();
+    }
+
+    function render() {
+      if (cards.length === 0) {
+        frontEl.textContent = '无符合条件的卡';
+        backEl.textContent = '请调整筛选条件';
+        progress.textContent = '0 / 0';
+        ratingBar.style.display = 'none';
+        return;
+      }
+      const c = cards[idx];
+      isFlipped = false;
+      card.classList.remove('flipped');
+      frontEl.textContent = c.front;
+      backEl.innerHTML = (c.back || '').replace(/\n/g, '<br>');
+      backHint.textContent = `${c.notebookTitle || c.notebook} · ${c.id}`;
+      progress.textContent = `${idx + 1} / ${cards.length}`;
+      typeHint.innerHTML = `<strong>${c.notebookTitle || c.notebook}</strong> · ID: ${c.id}`;
+      ratingBar.style.display = 'none';
+      navControls.style.display = 'flex';
+    }
+
     // 顶层状态变量与 DOM refs（flip/next/prev/rate 需访问）
     let data, cards, idx, notebookFilter, isFlipped;
     const session = { total: 0, know: 0, fuzzy: 0, unknow: 0 };
@@ -151,35 +181,7 @@ document.addEventListener("DOMContentLoaded", function() {
       });
     }
 
-    function applyFilter() {
-      cards = data.cards.filter(c => {
-        if (notebookFilter !== 'all' && c.notebook !== notebookFilter) return false;
-        return true;
-      });
-      idx = 0;
-      isFlipped = false;
-      render();
-    }
 
-    function render() {
-      if (cards.length === 0) {
-        frontEl.textContent = '无符合条件的卡';
-        backEl.textContent = '请调整筛选条件';
-        progress.textContent = '0 / 0';
-        ratingBar.style.display = 'none';
-        return;
-      }
-      const c = cards[idx];
-      isFlipped = false;
-      card.classList.remove('flipped');
-      frontEl.textContent = c.front;
-      backEl.innerHTML = (c.back || '').replace(/\n/g, '<br>');
-      backHint.textContent = `${c.notebookTitle || c.notebook} · ${c.id}`;
-      progress.textContent = `${idx + 1} / ${cards.length}`;
-      typeHint.innerHTML = `<strong>${c.notebookTitle || c.notebook}</strong> · ID: ${c.id}`;
-      ratingBar.style.display = 'none';
-      navControls.style.display = 'flex';
-    }
 
 
 
