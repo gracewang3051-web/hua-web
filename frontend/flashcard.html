@@ -84,14 +84,62 @@
   <script defer src="assets/js/supabase-config.js"></script>
   <script defer src="assets/js/app.js"></script>
   <script>
+    function flip() {
+      if (cards.length === 0) return;
+      isFlipped = !isFlipped;
+      card.classList.toggle('flipped', isFlipped);
+      if (isFlipped) {
+        ratingBar.style.display = 'flex';
+      } else {
+        ratingBar.style.display = 'none';
+      }
+    }
+    function next() {
+      if (cards.length === 0) return;
+      idx = (idx + 1) % cards.length;
+      render();
+    }
+    function prev() {
+      if (cards.length === 0) return;
+      idx = (idx - 1 + cards.length) % cards.length;
+      render();
+    }
+
+    async function rate(rating) {
+      const c = cards[idx];
+      session.total++;
+      session[rating]++;
+      document.getElementById('session-total').textContent = session.total;
+      document.getElementById(`session-${rating}`).textContent = session[rating];
+      // 上报
+      await recordAnswer(c.id, c.notebook, rating);
+      // 切到下一张
+      next();
+    }
+
+    // 顶层状态变量与 DOM refs（flip/next/prev/rate 需访问）
+    let data, cards, idx, notebookFilter, isFlipped;
+    const session = { total: 0, know: 0, fuzzy: 0, unknow: 0 };
+    let card, frontEl, backEl, backHint, progress, typeHint, ratingBar, navControls;
+
 document.addEventListener("DOMContentLoaded", function() {
 
-    const data = window.FLASHCARDS;
-    let cards = data.cards.slice();
-    let idx = 0;
-    let notebookFilter = 'all';
-    let isFlipped = false;
-    const session = { total: 0, know: 0, fuzzy: 0, unknow: 0 };
+
+
+    // 初始化（DOMContentLoaded 触发时赋值，flip 等顶层函数能访问）
+    data = window.FLASHCARDS;
+    cards = data.cards.slice();
+    idx = 0;
+    notebookFilter = 'all';
+    isFlipped = false;
+    card = document.getElementById('card');
+    frontEl = document.getElementById('front');
+    backEl = document.getElementById('back');
+    backHint = document.getElementById('back-hint');
+    progress = document.getElementById('progress');
+    typeHint = document.getElementById('type-hint');
+    ratingBar = document.getElementById('rating-bar');
+    navControls = document.getElementById('nav-controls');
 
     // URL 参数支持
     const urlParams = new URLSearchParams(location.search);
@@ -102,15 +150,6 @@ document.addEventListener("DOMContentLoaded", function() {
         c.classList.toggle('active', c.dataset.filter === initialNb);
       });
     }
-
-    const card = document.getElementById('card');
-    const frontEl = document.getElementById('front');
-    const backEl = document.getElementById('back');
-    const backHint = document.getElementById('back-hint');
-    const progress = document.getElementById('progress');
-    const typeHint = document.getElementById('type-hint');
-    const ratingBar = document.getElementById('rating-bar');
-    const navControls = document.getElementById('nav-controls');
 
     function applyFilter() {
       cards = data.cards.filter(c => {
@@ -142,40 +181,9 @@ document.addEventListener("DOMContentLoaded", function() {
       navControls.style.display = 'flex';
     }
 
-    function flip() {
-      if (cards.length === 0) return;
-      isFlipped = !isFlipped;
-      card.classList.toggle('flipped', isFlipped);
-      if (isFlipped) {
-        ratingBar.style.display = 'flex';
-      } else {
-        ratingBar.style.display = 'none';
-      }
-    }
 
-    function next() {
-      if (cards.length === 0) return;
-      idx = (idx + 1) % cards.length;
-      render();
-    }
 
-    function prev() {
-      if (cards.length === 0) return;
-      idx = (idx - 1 + cards.length) % cards.length;
-      render();
-    }
 
-    async function rate(rating) {
-      const c = cards[idx];
-      session.total++;
-      session[rating]++;
-      document.getElementById('session-total').textContent = session.total;
-      document.getElementById(`session-${rating}`).textContent = session[rating];
-      // 上报
-      await recordAnswer(c.id, c.notebook, rating);
-      // 切到下一张
-      next();
-    }
 
     // 键盘控制
     document.addEventListener('keydown', e => {

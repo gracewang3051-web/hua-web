@@ -80,20 +80,19 @@ document.addEventListener("DOMContentLoaded", function() {
     document.getElementById('flashcard-sub').textContent = `仅显示本课 ${cardsInNb} 张 · 答题记录自动同步`;
 
     // audio
+    // v1.2 fix: src 留空时 play 事件不触发 (播放键灰掉), 必须直接 set src
+    // Render 海外 metadata 抓取 ~1s 可接受, 不再走懒加载
     const audio = document.getElementById('audio-player');
-    // v1.2: src 留空, 用户点 ▶ 才加载 (避免 Render 海外 1s metadata 拉取阻塞首屏)
-    audio.dataset.src = `assets/audio/${nb}.mp3`;
-    audio.addEventListener('play', function once() {
-      if (!audio.src || audio.src === window.location.href) {
-        audio.src = audio.dataset.src;
-      }
-      audio.removeEventListener('play', once);
-    }, { once: true }); // v1.2: served from Render (in repo), not GitHub Releases
+    audio.src = `assets/audio/${nb}.mp3`;
+    audio.preload = 'metadata';
     document.getElementById('audio-info').textContent = `${nb}.mp3 · 加载中...`;
     audio.addEventListener('loadedmetadata', () => {
       const dur = Math.round(audio.duration);
       const m = Math.floor(dur/60), s = dur%60;
-      document.getElementById('audio-info').textContent = `${nb}.mp3 · ${m}分${s}秒 · ${(audio.duration*128/8/1024).toFixed(0)}KB/s`;
+      document.getElementById('audio-info').textContent = `${nb}.mp3 · ${m}分${s}秒`;
+    });
+    audio.addEventListener('error', () => {
+      document.getElementById('audio-info').textContent = `${nb}.mp3 · 加载失败 (HTTP ${audio.error?.code || '?'})`;
     });
 
     // flashcard link
